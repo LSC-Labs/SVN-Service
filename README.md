@@ -48,7 +48,7 @@ You need 3 docker volumes, otherwise you will loose your data. Either specify a 
 |Local path         | Function|
 |----------------   |----------|  
 |/etc/subversion    | User authentification and authorisation (subversion)|
-|/home/svn          | root path of all subversion repositories
+|/data/repos/svn    | root path of all subversion repositories
 |/opt/svnadmin/data | Config data of the svnadmin interface
 
 ## Run the image (sample)
@@ -56,7 +56,7 @@ You need 3 docker volumes, otherwise you will loose your data. Either specify a 
 The following sample runs the image, maps the ports 1:1 to the host and maps the 3 volumes to named persistent docker volumes.
 
 ```en
-docker run -d --name svn-service -p 80:80 -p 3690:3690 -v svn_repos:/home/svn -v svn_config:/etc/subversion -v svn_admin_config:/opt/svnadmin/data lsclabs/svn-service
+docker run -d --name svn-service -p 80:80 -p 3690:3690 -v svn_repos:/data/repos/svn -v svn_config:/etc/subversion -v svn_admin_config:/opt/svnadmin/data lsclabs/svn-service
 ```
 
 ## Using the running container
@@ -66,7 +66,7 @@ In the steps, the hostname is set to **localhost** and the port is **80**. Use y
 
 ### Step - prepare svnadmin
 
-Go to [http://localhost:80/svnadmin](http://localhost:80/svnadmin) and a panel will apear that has to be filled with the necessary information on the first call. This image already filled the elements with the defaults mostly matching for this image.
+Go to [http://localhost/svnadmin](http://localhost/svnadmin) and a panel will apear that has to be filled with the necessary information on the first call. This image already filled the elements with the defaults mostly matching for this image.
 Change if you want to use LDAP for authentication instead, or if you have special requirements.
 Press "test" on the elements to ensure all data is in place.
 
