@@ -1,7 +1,7 @@
 # SVN-Service
-# Subversion Service
+# Subversion Service with admin interface from M.Freiholz
 #
-# (c) LSC-Labs - P.Liebl
+# (c) 2022 LSC-Labs - P.Liebl
 #
 # Sample SVN-Service.yaml file 
 # change the volumes settings ant the repository names
