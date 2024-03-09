@@ -3,7 +3,7 @@
 [![Docker Image](https://img.shields.io/badge/docker%20image-available-green.svg)](https://hub.docker.com/r/lsclabs/svn-service/)
 
 As we need a subversion service in our environment we start to build a svn service from scratch.
-Inspired by smemberson, we started by using his prepared alpine linux and started to implement the layers.
+Inspired by smemberson, we started by using his prepared alpine linux and started to implement the layers. Also many thanks to the work of mfreihols for the iF.SVNAdmin module: https://github.com/mfreiholz/iF.SVNAdmin
 
 ## Use Case
 

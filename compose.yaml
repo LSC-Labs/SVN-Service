@@ -1,0 +1,27 @@
+# SVN-Service
+# Subversion Service
+#
+# (c) LSC-Labs - P.Liebl
+#
+# Sample SVN-Service.yaml file 
+# change the volumes settings ant the repository names
+# in "SVN_AREAS" environment to fit your requirements
+#
+version: "3"
+services:
+    SubVersion:
+        image: lsclabs/svn-service
+        container_name: svn-service
+        restart: unless-stopped
+        environment:
+            - SVN_Areas=Projects Libraries Data Tools
+            - TZ="Europe/Berlin"
+        volumes:
+            - svn_config:/etc/subversion
+            - svn_repos:/data/repos/svn
+            - svn_admin_config:/opt/svnadmin/data
+        ports:
+           - 8080:80
+           - 3690:3690
+        stdin_open: true 
+        tty: true            
