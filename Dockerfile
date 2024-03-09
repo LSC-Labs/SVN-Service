@@ -2,7 +2,7 @@
 #
 # SVN-Service 
 #
-# (c) 2022 LSC-Labs
+# (c) 2022 LSC-Labs - P.Liebl
 #
 # Alpine Linux with s6 service management - latest version
 # Additional layers :
@@ -23,6 +23,8 @@
 FROM smebberson/alpine-base:3.2.0
 
 LABEL "vendor"="LSC-Labs"
+LABEL "version"="1.2"
+LABEL "org.opencontainers.image.authors"="LSC-Labs"
 
 # -----------------------------------------------------
 # Add services configurations
