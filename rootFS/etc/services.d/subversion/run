@@ -1,0 +1,39 @@
+#!/usr/bin/with-contenv sh
+#
+# run subversion server
+# (c) 2021 LSC-Labs
+#
+# Inserts new SVN Areas into the access control file if not available
+# before starting the svn - server
+#
+# If some areas are no longer available - they will NOT be removed
+#
+# From https://github.com/smebberson/docker-alpine/tree/master/alpine-apache
+#
+
+echo "SVN: ===================================="
+echo "SVN: Preparing and starting subversion..."
+echo "SVN: ===================================="
+echo "SVN: ... using SVN_Areas by var : [$SVN_Areas]"
+
+
+# resolve directory of this script
+CurrentScript=`readlink -f "$0"`
+ScriptDir=`dirname "$CurrentScript"`
+Template_Folder=$ScriptDir/templates
+
+SVN_Access_File_Name=subversion-access-control
+SVN_Access_Template_File=$Template_Folder/$SVN_Access_File_Name
+SVN_Access_File=/etc/subversion/$SVN_Access_File_Name
+
+chmod a+w /etc/subversion/* 
+
+if [ ! -e $SVN_Access_File ]
+then
+    cp "$SVN_Access_Template_File" "$SVN_Access_File"
+else
+    echo "SVN: ... access file already exists: [$SVN_Access_File]" 
+fi
+chmod a+w "$SVN_Access_File"
+
+exec /usr/bin/svnserve -d --foreground -r "${SVN_Repositories}" --listen-port 3690;

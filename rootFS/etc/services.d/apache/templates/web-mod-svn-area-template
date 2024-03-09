@@ -1,0 +1,12 @@
+
+# Area : $(AreaName)
+<Location /svn/$(AreaName)>
+     DAV svn
+     SVNParentPath /home/svn/$(AreaName)
+     SVNListParentPath On
+     AuthType Basic
+     AuthName "Subversion Repository - $(AreaName)"
+     AuthUserFile /etc/subversion/passwd
+     AuthzSVNAccessFile /etc/subversion/subversion-access-control
+     Require valid-user
+  </Location>

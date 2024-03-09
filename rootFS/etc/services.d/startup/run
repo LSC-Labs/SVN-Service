@@ -1,0 +1,96 @@
+#!/usr/bin/with-contenv sh
+#
+# Startup of the container
+#
+# (c) 2021 LSC-Labs
+#
+# if repositories, and config areas are mounted to external volumes,
+# this script ensures the correct access rights to the files and directories.
+# it also checks, that the svnadmin config file contains the areas as defined by user
+#
+echo "LSC: ========================================="
+echo "LSC: Preparing subversion admin environment..."
+echo "LSC: ========================================="
+echo "LSC: SVN_Areas                    : [${SVN_Areas}]"
+echo "LSC: SVNAdmin data directory      : [${SVN_Admin_Data_Dir}]"
+echo "LSC: SVNAdmint templates directory: [${SVN_Admin_Templates_Dir}]"
+echo "LSC: Repository location          : [${SVN_Repositories}]"
+# if there is no real file, copy the template
+# but not the "." and thte ".."
+copyTemplateToSvnAdminDataIf() {
+    if [[ "$1" != "." && "$1" != ".." ]]
+    then
+        strFileName=$(basename "$1");
+        if [ ! -f "${SVN_Admin_Data_Dir}/${strFileName}" ]; then
+            echo "LSC: - copy template ${strFileName} to ${SVN_Admin_Data_Dir}"
+            cp "${1}" "${SVN_Admin_Data_Dir}/${strFileName}"
+            chmod a+w "${SVN_Admin_Data_Dir}/${strFileName}"
+        fi
+    fi
+}
+
+# Does the SVNAdmin Data Var exists ?
+# then set the access and check defaults
+if [ -n "${SVN_Admin_Data_Dir}" ]; then
+    echo "LSC: Setting write rights to: ${SVN_Admin_Data_Dir}"
+    chmod -R a+w "${SVN_Admin_Data_Dir}"
+    # copy all non existing files from templates to data
+    if [ -n "${SVN_Admin_Templates_Dir}" ]; then
+        TemplateFiles="${SVN_Admin_Templates_Dir}/*" 
+        for f in $TemplateFiles
+        do
+            copyTemplateToSvnAdminDataIf "$f"
+        done
+    fi
+
+    # create a default config file, if it does not exist.
+    # home/svn is hard coded - to keep it simple - please correct
+    # if necessary in the Dockerfile
+    strConfigFile="${SVN_Admin_Data_Dir}/config.ini"
+    if [ ! -f "${strConfigFile}" ]; then
+        echo "LSC: missing ${strConfigFile}... creating from template"
+        cp "${SVN_Admin_Data_Dir}/config.tpl.ini" "${strConfigFile}"
+        chmod a+w "${strConfigFile}" 
+	    sed -i 's/SVNUserFile=/SVNUserFile=\/etc\/subversion\/passwd/g' 		 			"${strConfigFile}"
+        sed -i 's/SVNAuthFile=/SVNAuthFile=\/etc\/subversion\/subversion-access-control/g' 	"${strConfigFile}"
+   	    sed -i "s|SVNParentPath=|SVNParentPath=${SVN_Repositories}|g"                       "${strConfigFile}"
+	    sed -i 's/SvnExecutable=/SvnExecutable=\/usr\/bin\/svn/g'  				 			"${strConfigFile}"
+	    sed -i 's/SvnAdminExecutable=/SvnAdminExecutable=\/usr\/bin\/svnadmin/g' 			"${strConfigFile}"
+    fi
+
+    # now check if for all areas a svn entry is inside the svnadmin interface...
+    set -- $SVN_Areas
+    for strAreaName in "$@"
+    do 
+        echo "LSC: checking for Area : [$strAreaName]"
+        nExistCount=$(grep -c "SVNParentPath=${SVN_Repositories}/${strAreaName}$" "${strConfigFile}")
+        if [ $nExistCount = 0 ]; then
+            echo "LSC:  - missing svnadmin entry - creating..."
+            nNextIndex=$(grep -c "\[Repositories:svnclient" "${strConfigFile}")
+            echo ""                                                     >> $strConfigFile
+            echo "[Repositories:svnclient:${nNextIndex}]"               >> $strConfigFile
+            echo "SVNParentPath=${SVN_Repositories}/${strAreaName}"    >> $strConfigFile
+            echo "Description=${strAreaName} Area"                      >> $strConfigFile
+        fi
+        # Area directory exists ?
+        if [ -n "${SVN_Repositories}/${strAreaName}" ];
+        then
+            echo "LSC:  - missing repository area - creating directory ${SVN_Repositories}/${strAreaName}"
+            mkdir -p    "${SVN_Repositories}/${strAreaName}"
+            chmod a+w   "${SVN_Repositories}/${strAreaName}" 
+        fi
+    done
+else 
+    echo "LSC: ERROR - Missing directory [${SVN_Admin_Data_Dir}]"
+fi
+
+# create a default passwd - if it does not exist
+# and set the needed access rights
+[[ -n "/etc/subversion/passwd" ]] && touch /etc/subversion/passwd
+chmod a+w /etc/subversion
+chmod a+w /data/repos/svn
+
+echo "LSC: access the admin interface with <HostName>/svnadmin"
+echo "LSC: done..."
+
+while true; do sleep 3600; done    
